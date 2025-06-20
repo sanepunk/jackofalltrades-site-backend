@@ -12,7 +12,9 @@ async def root():
     """Health check endpoint"""
     return HealthResponse(
         status="healthy",
-        message="jackofalltrades Download Stats API is running"
+        message="jackofalltrades Download Stats API is running",
+        database_connected=True if db_config.host else False,
+        api_key_configured=True if settings.PEPPY_API_KEY else False
     )
 
 @router.get("/health", response_model=HealthResponse)

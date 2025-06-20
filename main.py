@@ -20,10 +20,7 @@ app = FastAPI(
 
 # CORS configuration
 origins = [
-    os.getenv("FRONTEND_URL", "http://localhost:5173"),
-    "http://localhost:3000",  # Additional frontend ports
-    "http://localhost:5000",
-    "http://127.0.0.1:5173",
+    "https://jackofalltrades-py.netlify.app/"
 ]
 
 app.add_middleware(
@@ -208,18 +205,3 @@ async def http_exception_handler(request, exc):
             "last_updated": ""
         }
     )
-
-if __name__ == "__main__":
-    import uvicorn
-    
-    host = os.getenv("HOST", "0.0.0.0")
-    port = int(os.getenv("PORT", 8000))
-    debug = os.getenv("DEBUG", "True").lower() == "true"
-    
-    uvicorn.run(
-        "main:app",
-        host=host,
-        port=port,
-        reload=debug,
-        log_level="info"
-    ) 

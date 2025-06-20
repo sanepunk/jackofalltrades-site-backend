@@ -20,7 +20,7 @@ app = FastAPI(
 
 # CORS configuration
 origins = [
-    "https://jackofalltrades-py.netlify.app/"
+    "https://jackofalltrades-py.netlify.app"
 ]
 
 app.add_middleware(

@@ -15,7 +15,7 @@ async def api_key_auth(api_key: str = Security(api_key_header)):
             detail="API key is missing"
         )
     
-    if api_key != os.getenv("API_AUTHORIZATION_2"):
+    if api_key != os.getenv("API_AUTHORIZATION"):
         raise HTTPException(
             status_code=HTTP_403_FORBIDDEN,
             detail="Invalid API key"

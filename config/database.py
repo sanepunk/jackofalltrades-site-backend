@@ -144,3 +144,17 @@ def cleanup_old_cache(days_old: int = 7):
     except Exception as e:
         print(f"Error cleaning up cache: {e}")
         return 0 
+
+def cleanup_all_cache():
+    """Delete all cache entries"""
+    try:
+        with get_db_connection() as conn:
+            with conn.cursor() as cursor:
+                query = "DELETE FROM api_cache"
+                cursor.execute(query)
+                deleted_count = cursor.rowcount
+        print(f"Deleted all {deleted_count} cache entries")
+        return deleted_count
+    except Exception as e:
+        print(f"Error cleaning up all cache: {e}")
+        return 0

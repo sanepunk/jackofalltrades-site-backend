@@ -1,9 +1,10 @@
-from fastapi import APIRouter, HTTPException
+from fastapi import APIRouter, HTTPException, Depends
 from datetime import datetime
 from config.settings import settings
-from config.database import get_latest_cached_response, cleanup_old_cache, get_db_connection, db_config
+from config.database import get_latest_cached_response, cleanup_old_cache, cleanup_all_cache, get_db_connection, db_config
 from models.schemas import DownloadStatsResponse, HealthResponse
 from services.pepy_service import pepy_service
+from .api_authorization import api_key_auth
 
 router = APIRouter()
 
@@ -105,7 +106,7 @@ def get_formatted_download_stats():
     }
 
 @router.get("/api/cache/status")
-def get_cache_status():
+def get_cache_status(api_key: str = Depends(api_key_auth)):
     """Get cache status and recent entries"""
     try:
         with get_db_connection() as conn:
@@ -127,7 +128,7 @@ def get_cache_status():
                     SELECT endpoint, status_code, success, created_at
                     FROM api_cache 
                     ORDER BY created_at DESC 
-                    LIMIT 10
+                    LIMIT 2
                 """)
                 recent_entries = cursor.fetchall()
         
@@ -139,7 +140,7 @@ def get_cache_status():
         return {"error": f"Failed to get cache status: {e}"}
 
 @router.post("/api/cache/cleanup")
-def cleanup_cache(days_old: int = 7):
+def cleanup_cache(api_key: str = Depends(api_key_auth), days_old: int = 7):
     """Clean up old cache entries"""
     try:
         deleted_count = cleanup_old_cache(days_old)
@@ -153,8 +154,23 @@ def cleanup_cache(days_old: int = 7):
             detail=f"Cache cleanup failed: {e}"
         )
 
+@router.post("/api/cache/cleanup/all")
+def cleanup_all_cache_entries(api_key: str = Depends(api_key_auth)):
+    """Delete all cache entries"""
+    try:
+        deleted_count = cleanup_all_cache()
+        return {
+            "success": True,
+            "message": f"Deleted all {deleted_count} cache entries"
+        }
+    except Exception as e:
+        raise HTTPException(
+            status_code=500,
+            detail=f"Cache cleanup failed: {e}"
+        )
+
 @router.get("/api/database/test")
-def test_database_connection():
+def test_database_connection(api_key: str = Depends(api_key_auth)):
     """Test database connection and operations"""
     try:
         with get_db_connection() as conn:
